@@ -134,6 +134,13 @@ func main() {
 	cmdConsole.Flag("link", "Present link to AWS console instead of opening browser").BoolVar(&consoleFlags.Link)
 	cmdConsole.Flag("credentials-file", "The file that will cache the credentials retrieved from AWS. When not specified, will use the default AWS credentials file location. (env: SAML2AWS_CREDENTIALS_FILE)").Envar("SAML2AWS_CREDENTIALS_FILE").StringVar(&commonFlags.CredentialsFile)
 
+	// `switchrole` command and settings
+	cmdSwitchRole := app.Command("switch-role", "Switch to other AWS account's IAM role")
+	switchRoleFlags := new(flags.LoginExecFlags)
+	switchRoleFlags.CommonFlags = commonFlags
+	cmdSwitchRole.Flag("cache-saml", "Caches the SAML response (env: SAML2AWS_CACHE_SAML)").Envar("SAML2AWS_CACHE_SAML").BoolVar(&commonFlags.SAMLCache)
+	cmdSwitchRole.Flag("cache-file", "The location of the SAML cache file (env: SAML2AWS_SAML_CACHE_FILE)").Envar("SAML2AWS_SAML_CACHE_FILE").StringVar(&commonFlags.SAMLCacheFile)
+
 	// `list` command and settings
 	cmdListRoles := app.Command("list-roles", "List available role ARNs.")
 	cmdListRoles.Flag("cache-saml", "Caches the SAML response (env: SAML2AWS_CACHE_SAML)").Envar("SAML2AWS_CACHE_SAML").BoolVar(&commonFlags.SAMLCache)
@@ -189,6 +196,8 @@ func main() {
 		err = commands.Exec(execFlags, *cmdLine)
 	case cmdConsole.FullCommand():
 		err = commands.Console(consoleFlags)
+	case cmdSwitchRole.FullCommand():
+		err = commands.SwitchRole(switchRoleFlags)
 	case cmdListRoles.FullCommand():
 		err = commands.ListRoles(listRolesFlags)
 	case cmdConfigure.FullCommand():
